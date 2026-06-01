@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "c1a3db4b2f3748c7a771af2a3d45ceaa"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+    TrackJS.track('Testing TrackJS!');
+  </script>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab 9</title>
-
+  
   <style>
-    button {
-      margin: 3px;
-    }
-
-    button:hover {
-      cursor: pointer;
-    }
-
-    #first-num,
-    #second-num {
-      width: 60px;
-    }
-
+    button { margin: 3px; }
+    button:hover { cursor: pointer; }
+    #first-num, #second-num { width: 60px; }
     output {
       border: 1px solid gray;
       display: block;
@@ -29,11 +26,7 @@
       padding: 5px;
       width: 240px;
     }
-
-    main {
-      width: 800px;
-    }
-
+    main { width: 800px; }
     #error-btns {
       column-gap: 5px;
       display: flex;
@@ -41,14 +34,12 @@
       margin-top: 30px;
       row-gap: 5px;
     }
-
     #error-btns>* {
       padding: 8px 2px;
       width: 122px;
     }
   </style>
 </head>
-
 <body>
   <main>
     <form>
@@ -67,7 +58,6 @@
         <output></output>
       </fieldset>
     </form>
-
     <section id="error-btns">
       <button>Console Log</button>
       <button>Console Error</button>
@@ -88,6 +78,13 @@
   </main>
 
   <script>
+    class CalculatorError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "CalculatorError";
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,14 +92,78 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      
+      // Step 3: Trying Try/Catch/Finally and Throw in a realistic setting
+      try {
+        if (firstNum === '' || secondNum === '') {
+          throw new CalculatorError('Missing inputs: Please enter numbers in both fields.');
+        }
+        if (isNaN(firstNum) || isNaN(secondNum)) {
+          throw new CalculatorError('Invalid input: Only numeric values are allowed.');
+        }
+        if (operator === '/' && Number(secondNum) === 0) {
+          throw new CalculatorError('Math Error: Cannot divide by zero.');
+        }
+        
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      } catch (error) {
+        console.error(`${error.name} caught: ${error.message}`);
+        output.innerHTML = "Error! See console.";
+      } finally {
+        console.log("Calculation attempt finished.");
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
-    // Start your code here
-    // You may move this JS to another file if you wish
+    errorBtns[0].addEventListener('click', () => console.log('Console Log Demo'));
+    errorBtns[1].addEventListener('click', () => console.error('Console Error Demo'));
+    errorBtns[2].addEventListener('click', () => console.count('Demo Count'));
+    errorBtns[3].addEventListener('click', () => console.warn('Console Warn Demo'));
+    
+    errorBtns[4].addEventListener('click', () => {
+      const number = 2;
+      console.assert(number === 3, 'Assertion failed: number is not 3');
+    });
+    
+    errorBtns[5].addEventListener('click', () => console.clear());
+    errorBtns[6].addEventListener('click', () => console.dir(document.querySelector('#error-btns')));
+    errorBtns[7].addEventListener('click', () => console.dirxml(document.querySelector('#error-btns')));
+    
+    // Group methods
+    errorBtns[8].addEventListener('click', () => {
+      console.group('Console Group Demo');
+      console.log('Inside the group!');
+    });
+    errorBtns[9].addEventListener('click', () => console.groupEnd('Console Group Demo'));
+    
+    // Console Table
+    errorBtns[10].addEventListener('click', () => {
+      console.table([
+        { course: 'CSE110', subject: 'Software Engineering' },
+        { course: 'CSE100', subject: 'Advanced Data Structures' }
+      ]);
+    });
+    
+    // Timer methods
+    errorBtns[11].addEventListener('click', () => console.time('Demo Timer'));
+    errorBtns[12].addEventListener('click', () => console.timeEnd('Demo Timer'));
+    
+    // Console Trace
+    errorBtns[13].addEventListener('click', () => {
+      const handleTrace = () => { console.trace('Trace Example'); };
+      handleTrace();
+    });
+
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.log("Global Error Caught by window.onerror:");
+      console.log(`Message: ${message}`);
+    };
+
+    errorBtns[14].addEventListener('click', () => {
+      nonExistentFunction(); 
+    });
+
   </script>
 </body>
-
 </html>
